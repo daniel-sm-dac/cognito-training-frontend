@@ -105,7 +105,6 @@ async function submitRegistration() {
 }
 
 const config = useRuntimeConfig()
-console.log('Test:', config.public.cognitoUserPoolId)
 </script>
 
 <template>

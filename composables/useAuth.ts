@@ -35,6 +35,7 @@ export function useAuth() {
       return { success: true, isSignUpComplete, nextStep, error: null }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Registration failed'
+      console.log(message);
       return { success: false, error: message }
     }
   }
