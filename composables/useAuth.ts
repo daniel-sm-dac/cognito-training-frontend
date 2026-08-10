@@ -1,27 +1,5 @@
 import { Amplify } from 'aws-amplify'
-import { signUp, type SignUpInput } from 'aws-amplify/auth'
-
-const authConfig = {
-  Auth: {
-    Cognito: {
-      userPoolId: 'ap-southeast-1_Ln45WX58a',
-      userPoolClientId: '24m0c8so19lu71q1dscstrnae9',
-      identityPoolId: 'ap-southeast-1:1056eb60-4765-48dc-9dba-9d09186ffe56',
-      loginWith: {
-        email: true,
-      },
-    },
-  },
-}
-
-function ensureAmplifyAuthConfigured() {
-  const currentConfig = Amplify.getConfig()
-  const hasCognitoConfig = currentConfig?.Auth?.Cognito?.userPoolId && currentConfig?.Auth?.Cognito?.userPoolClientId
-
-  if (!hasCognitoConfig) {
-    Amplify.configure(authConfig as any)
-  }
-}
+import { signIn, signUp, type SignUpInput } from 'aws-amplify/auth'
 
 export interface RegisterInput {
   email: string
@@ -39,8 +17,6 @@ export interface AuthResult {
 
 export function useAuth() {
   async function register(input: RegisterInput): Promise<AuthResult> {
-    ensureAmplifyAuthConfigured()
-
     const signUpInput: SignUpInput = {
       username: input.email,
       password: input.password,
@@ -64,13 +40,12 @@ export function useAuth() {
   }
 
   async function login(email: string, password: string): Promise<AuthResult> {
-    ensureAmplifyAuthConfigured()
-
-    return {
-      success: true,
-      error: null,
-      isSignUpComplete: true,
-      nextStep: { email, password },
+    try {
+      const { isSignedIn, nextStep } = await signIn({ username: email, password })
+      return { success: isSignedIn, nextStep, error: null }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Login failed'
+      return { success: false, error: message }
     }
   }
 

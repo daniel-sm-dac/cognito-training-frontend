@@ -103,9 +103,13 @@ async function submitRegistration() {
     submitting.value = false
   }
 }
+
+const config = useRuntimeConfig()
+console.log('Test:', config.public.cognitoUserPoolId)
 </script>
 
 <template>
+  <div>{{ config.public.cognitoUserPoolId }}</div>
   <div class="register-page">
     <h1>Register</h1>
     <form @submit.prevent="submitRegistration">
