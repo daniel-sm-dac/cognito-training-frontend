@@ -1,5 +1,5 @@
 import { Amplify } from 'aws-amplify'
-import { signIn, signUp, type SignUpInput } from 'aws-amplify/auth'
+import { confirmSignUp, resendSignUpCode, signIn, signUp, type SignUpInput } from 'aws-amplify/auth'
 
 export interface RegisterInput {
   email: string
@@ -35,7 +35,6 @@ export function useAuth() {
       return { success: true, isSignUpComplete, nextStep, error: null }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Registration failed'
-      console.log(message);
       return { success: false, error: message }
     }
   }
@@ -50,8 +49,33 @@ export function useAuth() {
     }
   }
 
+  async function verifyEmail(email: string, code: string): Promise<AuthResult>{
+    try {
+      const { isSignUpComplete, nextStep } = await confirmSignUp({
+        username: email,
+        confirmationCode: code
+      })
+      return { success: isSignUpComplete, nextStep ,error: null }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Verification failed'
+      return { success: false, error: message }
+    }
+  }
+
+  async function resendVerifcationCode(email: string): Promise<AuthResult> {
+    try {
+      await resendSignUpCode({ username: email })
+      return { success: true, error: null }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Resend verification failed'
+      return { success: false, error: message }
+    }
+  }
+
   return {
+    resendVerifcationCode,
     register,
     login,
+    verifyEmail
   }
 }
