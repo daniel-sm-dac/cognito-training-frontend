@@ -1,5 +1,9 @@
 import { Amplify } from 'aws-amplify'
 import { confirmSignUp, resendSignUpCode, signIn, signUp, type SignUpInput } from 'aws-amplify/auth'
+import { generateClient } from 'aws-amplify/api'
+import { confirmSignUp, fetchAuthSession, getCurrentUser, resendSignUpCode, signIn, signOut, signUp, type SignUpInput } from 'aws-amplify/auth'
+const user = useState<{ userId: string; email: string } | null>('auth-user', () => null)
+const isAuthenticated = useState<boolean>('auth-is-authenticated', () => false)
 
 export interface RegisterInput {
   email: string
@@ -11,8 +15,9 @@ export interface RegisterInput {
 export interface AuthResult {
   success: boolean
   isSignUpComplete?: boolean
-  nextStep?: unknown
+  nextStep?: any
   error: string | null
+  errorName: string | null
 }
 
 export function useAuth() {
@@ -32,20 +37,73 @@ export function useAuth() {
 
     try {
       const { isSignUpComplete, nextStep } = await signUp(signUpInput)
-      return { success: true, isSignUpComplete, nextStep, error: null }
+      return { success: true, isSignUpComplete, nextStep, error: null, errorName: null }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Registration failed'
-      return { success: false, error: message }
+      const name = err instanceof Error ? err.name : null
+      return { success: false, error: message, errorName: name}
     }
   }
 
   async function login(email: string, password: string): Promise<AuthResult> {
     try {
       const { isSignedIn, nextStep } = await signIn({ username: email, password })
-      return { success: isSignedIn, nextStep, error: null }
+      if (isSignedIn) {
+        await refreshCurrentUser()
+      }
+      return { success: isSignedIn, nextStep, error: null, errorName: null }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Login failed'
-      return { success: false, error: message }
+      const name = err instanceof Error ? err.name : null
+      return { success: false, error: message, errorName: name }
+    }
+  }
+
+  async function logout() {
+    await signOut()
+    user.value = null
+    isAuthenticated.value = false
+  }
+
+  // Pull the current ID/Access/refresh token set for API calls. 
+  async function getTokens() {
+    const session = await fetchAuthSession()
+    return {
+      idToken : session.tokens?.idToken?.toString() ?? null,
+      accessToken : session.tokens?.accessToken?.toString() ?? null
+    }
+  }
+
+  async function authFetch(url: string, options: RequestInit = {}) {
+    const { idToken } = await getTokens()
+    
+    if (!idToken) {
+      throw new Error('Not signed in - no token available for this request.')
+    }
+
+    const headerWithToken = {
+      ...options.headers,
+      Authorization: `Bearer ${idToken}`
+    }
+
+    return fetch(url, {
+      ...options,
+      headers: headerWithToken
+    })
+  }
+
+  async function refreshCurrentUser(){
+    try {
+      const current = await getCurrentUser()
+      user.value = {
+        userId: current.userId,
+        email: current.signInDetails?.loginId ?? ''
+      }
+
+      isAuthenticated.value = true
+    } catch (error) {
+      user.value = null
+      isAuthenticated.value = false
     }
   }
 
@@ -55,27 +113,35 @@ export function useAuth() {
         username: email,
         confirmationCode: code
       })
-      return { success: isSignUpComplete, nextStep ,error: null }
+      return { success: isSignUpComplete, nextStep ,error: null, errorName: null }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Verification failed'
-      return { success: false, error: message }
+      const name = err instanceof Error ? err.name : null
+      return { success: false, error: message, errorName: name}
     }
   }
 
-  async function resendVerifcationCode(email: string): Promise<AuthResult> {
+  async function resendVerificationCode(email: string): Promise<AuthResult> {
     try {
       await resendSignUpCode({ username: email })
-      return { success: true, error: null }
+      return { success: true, error: null, errorName: null }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Resend verification failed'
-      return { success: false, error: message }
+      const name = err instanceof Error ? err.name : null
+      return { success: false, error: message, errorName: name }
     }
   }
 
   return {
-    resendVerifcationCode,
+    resendVerificationCode,
     register,
     login,
-    verifyEmail
+    logout,
+    verifyEmail,
+    authFetch,
+    getTokens,
+    refreshCurrentUser,
+    isAuthenticated,
+    user
   }
 }
