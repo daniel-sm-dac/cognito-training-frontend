@@ -2,8 +2,7 @@ import { confirmSignUp, fetchAuthSession, getCurrentUser, resendSignUpCode, sign
 
 
 // Shared reactive state across every component that calls useAuth()
-const user = useState<{ userId: string; email: string } | null>('auth-user', () => null)
-const isAuthenticated = useState<boolean>('auth-is-authenticated', () => false)
+// const user = useState<{ userId: string; email: string } | null>('auth-user', () => null)
 
 export interface RegisterInput {
   email: string
@@ -21,6 +20,8 @@ export interface AuthResult {
 }
 
 export function useAuth() {
+  const isAuthenticated = useState<boolean>('auth-is-authenticated', () => false)
+
   async function register(input: RegisterInput): Promise<AuthResult> {
     const signUpInput: SignUpInput = {
       username: input.email,
@@ -49,7 +50,7 @@ export function useAuth() {
     try {
       const { isSignedIn, nextStep } = await signIn({ username: email, password })
       if (isSignedIn) {
-        await refreshCurrentUser()
+        await restoreSession()
       }
       return { success: isSignedIn, nextStep, error: null, errorName: null }
     } catch (err: unknown) {
@@ -61,8 +62,8 @@ export function useAuth() {
 
   async function logout() {
     await signOut()
-    user.value = null
-    isAuthenticated.value = false
+    // user.value = null
+    // isAuthenticated.value = false
   }
 
   // Pull the current ID/Access/refresh token set for API calls. 
@@ -92,17 +93,18 @@ export function useAuth() {
     })
   }
 
-  async function refreshCurrentUser(){
+  async function restoreSession(){
     try {
       const current = await getCurrentUser()
-      user.value = {
-        userId: current.userId,
-        email: current.signInDetails?.loginId ?? ''
-      }
+      console.log(current)
+      // user.value = {
+      //   userId: current.userId,
+      //   email: current.signInDetails?.loginId ?? ''
+      // }
 
       isAuthenticated.value = true
     } catch (error) {
-      user.value = null
+      // user.value = null
       isAuthenticated.value = false
     }
   }
@@ -140,8 +142,8 @@ export function useAuth() {
     verifyEmail,
     authFetch,
     getTokens,
-    refreshCurrentUser,
+    restoreSession,
     isAuthenticated,
-    user
+    // user
   }
 }
