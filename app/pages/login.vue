@@ -48,12 +48,16 @@ import { useAuth } from '../composables/useAuth'
       }
     }
 
+    console.log("result :", result)
     switch (result.errorName) {
       case 'UserNotFoundException':
         error.value = 'No account found with that email.'
         break
       case 'NotAuthorizedException':
         error.value = 'Incorrect email or password.'
+        break
+      case 'UserLambdaValidationException':
+        error.value = 'Login failed.'
         break
       default:
         error.value = result.error ?? 'Login failed.'

@@ -9,35 +9,46 @@ const email = ref((route.query.email as string) ?? '')
 const code = ref('')
 const errorMessage = ref('')
 const statusMessage = ref('')
-const isSubmitting = ref(false)
-const isResending = ref(false)
+const submitting = ref(false)
+// const isResending = ref(false)
 
 async function handleVerify() {
   errorMessage.value = ''
   statusMessage.value = ''
-  isSubmitting.value = true
+  submitting.value = true
 
-  const result = await verifyEmail(email.value, code.value)
-  isSubmitting.value = false
+  try {
+    const result = await verifyEmail(email.value, code.value)
 
-  if (!result.success) {
-    errorMessage.value = result.error ?? 'Verification failed.'
-    return
+    if (!result.success) {
+      errorMessage.value = result.error ?? 'Verification failed.'
+      return
+    }
+
+    router.push({ path: '/login' })
+  } catch (err) {
+    errorMessage.value = err instanceof Error ? err.message : 'Verification failed.'
+  } finally {
+    submitting.value = false
   }
-
-//   router.push({ path: '/login', query: { verified: '1' } })
 }
 
 async function handleResend() {
   errorMessage.value = ''
-  isResending.value = true
-  const result = await resendVerificationCode(email.value)
-  isResending.value = false
+  submitting.value = true
 
-  statusMessage.value = result.success
-    ? 'A new code has been sent to your email.'
-    : ''
-  if (!result.success) errorMessage.value = result.error ?? 'Could not resend code.'
+  try {
+    const result = await resendVerificationCode(email.value)
+
+    statusMessage.value = result.success
+      ? 'A new code has been sent to your email.'
+      : ''
+    if (!result.success) errorMessage.value = result.error ?? 'Could not resend code.'
+  } catch (err) {
+    errorMessage.value = err instanceof Error ? err.message : 'Could not resend code.'
+  } finally {
+    submitting.value = false
+  }
 }
 
 </script>
@@ -64,8 +75,8 @@ async function handleResend() {
         <input v-model="code" type="text" placeholder="Verification code" required />
       </div>
       
-      <button type="submit">Verify</button>&nbsp;
-      <button type="button" @click="handleResend">Resend code</button>
+      <button type="submit" :disabled="submitting">Verify</button>&nbsp;
+      <button type="button" @click="handleResend" :disabled="submitting">Resend code</button>
       <p v-if="errorMessage">{{ errorMessage }}</p>
       <p v-if="statusMessage">{{ statusMessage }}</p>
     </form>
