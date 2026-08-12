@@ -5,7 +5,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (import.meta.server) return
 
   const { isAuthenticated, restoreSession } = useAuth()
-  console.log("isAuthenticate: ", isAuthenticated)
+  console.log("isAuthenticate: ", isAuthenticated.value)
 
   if (!isAuthenticated.value) {
     await restoreSession()

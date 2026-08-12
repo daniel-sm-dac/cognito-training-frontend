@@ -8,13 +8,13 @@ const router = useRouter()
 const email = ref((route.query.email as string) ?? '')
 const code = ref('')
 const errorMessage = ref('')
-const infoMessage = ref('')
+const statusMessage = ref('')
 const isSubmitting = ref(false)
 const isResending = ref(false)
 
-async function handleVerificationCode() {
+async function handleVerify() {
   errorMessage.value = ''
-  infoMessage.value = ''
+  statusMessage.value = ''
   isSubmitting.value = true
 
   const result = await verifyEmail(email.value, code.value)
@@ -34,7 +34,7 @@ async function handleResend() {
   const result = await resendVerificationCode(email.value)
   isResending.value = false
 
-  infoMessage.value = result.success
+  statusMessage.value = result.success
     ? 'A new code has been sent to your email.'
     : ''
   if (!result.success) errorMessage.value = result.error ?? 'Could not resend code.'
@@ -44,34 +44,30 @@ async function handleResend() {
 
 <template>
   <div class="auth-page">
-    <form class="auth-form" @submit.prevent="handleVerificationCode">
-      <h1>We Emailed You</h1>
+    <h1>We Emailed You</h1>
       <p v-if="email">
         Your code is on the way. To log in, enter the code we emailed to {{ email }}. it may take a minute to arrive.</p>
       <p v-else class="info">
       Already registered? Enter your email and the code we sent you.
       Otherwise, <NuxtLink to="/register">create an account</NuxtLink> first.
       </p>
+
+
+    <form @submit.prevent="handleVerify">
       <div class="form-group">
-          <label for="email">Email</label>
-          <input v-model="email" type="email" required autocomplete="email" />
+        <label for="email">Email</label>
+        <input v-model="email" type="email" placeholder="Email" required />
       </div>
-
-      <label>
-      Verification code
-      <input v-model="code" type="text" inputmode="numeric" required autocomplete="one-time-code" />
-      </label>
-
-      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-      <p v-if="infoMessage" class="info">{{ infoMessage }}</p>
-
-      <button type="submit" :disabled="isSubmitting">
-      {{ isSubmitting ? 'Verifying...' : 'Verify' }}
-      </button>
-      |
-      <button type="button" class="link-button" :disabled="isResending" @click="handleResend">
-      {{ isResending ? 'Sending...' : 'Resend code' }}
-      </button>
+      
+      <div class="form-group">
+        <label for="code">code</label>
+        <input v-model="code" type="text" placeholder="Verification code" required />
+      </div>
+      
+      <button type="submit">Verify</button>&nbsp;
+      <button type="button" @click="handleResend">Resend code</button>
+      <p v-if="errorMessage">{{ errorMessage }}</p>
+      <p v-if="statusMessage">{{ statusMessage }}</p>
     </form>
   </div>
   

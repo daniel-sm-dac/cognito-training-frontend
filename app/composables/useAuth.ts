@@ -1,8 +1,7 @@
 import { confirmSignUp, fetchAuthSession, getCurrentUser, resendSignUpCode, signIn, signOut, signUp, type SignUpInput } from 'aws-amplify/auth'
 
 
-// Shared reactive state across every component that calls useAuth()
-// const user = useState<{ userId: string; email: string } | null>('auth-user', () => null)
+
 
 export interface RegisterInput {
   email: string
@@ -20,6 +19,8 @@ export interface AuthResult {
 }
 
 export function useAuth() {
+  // Shared reactive state across every component that calls useAuth()
+  const user = useState<{ userId: string; email: string } | null>('auth-user', () => null)
   const isAuthenticated = useState<boolean>('auth-is-authenticated', () => false)
 
   async function register(input: RegisterInput): Promise<AuthResult> {
@@ -97,10 +98,10 @@ export function useAuth() {
     try {
       const current = await getCurrentUser()
       console.log(current)
-      // user.value = {
-      //   userId: current.userId,
-      //   email: current.signInDetails?.loginId ?? ''
-      // }
+      user.value = {
+        userId: current.userId,
+        email: current.signInDetails?.loginId ?? ''
+      }
 
       isAuthenticated.value = true
     } catch (error) {
@@ -144,6 +145,6 @@ export function useAuth() {
     getTokens,
     restoreSession,
     isAuthenticated,
-    // user
+    user
   }
 }

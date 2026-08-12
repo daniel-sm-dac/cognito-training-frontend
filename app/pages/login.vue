@@ -1,5 +1,6 @@
 <script setup lang="ts">
-  import { useAuth } from '../composables/useAuth'
+  import { P } from 'vue-router/dist/index-BN0B0y8a.js'
+import { useAuth } from '../composables/useAuth'
 
   interface LoginForm {
     email: string
@@ -13,7 +14,6 @@
     code: ''
   })
 
-  const route = useRoute()
   const router = useRouter()
   const submitting = ref(false)
   const error = ref('')
@@ -34,39 +34,30 @@
       // page can read them back via authFetch() whenever it needs to call
       // an API. We just redirect; nothing else to do here.
 
-      // router.push('/dashboard')
+      router.push('/dashboard')
       return
     }
-    console.log(result.nextStep)
-    const code = result.errorName ?? result.nextStep?.signInStep ?? 'UNKNOWN'
-  
-    switch (code) {
+
+    if (result.nextStep){
+      switch (result.nextStep.signInStep) {
+        case 'CONFIRM_SIGN_UP':
+            return navigateTo(`/verify?email=${encodeURIComponent(form.email)}`)
+        default:
+          error.value = 'Additional Verification required'
+          break;
+      }
+    }
+
+    switch (result.errorName) {
       case 'UserNotFoundException':
+        error.value = 'No account found with that email.'
+        break
       case 'NotAuthorizedException':
         error.value = 'Incorrect email or password.'
         break
-  
-      case 'UserNotConfirmedException':
-        router.push({ path: '/verify', query: { email: form.email } })
-        break
-  
-      case 'LimitExceededException':
-      case 'TooManyRequestsException':
-        error.value = 'Too many attempts. Please wait and try again.'
-        break
-      case 'CONFIRM_SIGN_UP':
-        // Same situation as UserNotConfirmedException above, just
-        // surfaced through nextStep instead of a thrown exception.
-        router.push({ path: '/verify', query: { email: form.email } })
-        break
-
       default:
-        error.value = result.error || 'Login failed.'
+        error.value = result.error ?? 'Login failed.'
     }
-  }
-
-  async function handleReVerification() {
-
   }
 </script>
 
