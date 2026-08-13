@@ -1,13 +1,19 @@
+<script setup lang="ts">
+import { useAuth } from './composables/useAuth'
+const { user } = useAuth()
+
+</script>
+
 <template>
   <div class="app-shell">
     <NuxtRouteAnnouncer />
-
-    <nav class="top-nav">
-      <NuxtLink to="/register">Register</NuxtLink>
-      <NuxtLink to="/login">Login</NuxtLink>
-      <NuxtLink to="/dashboard">Dashboard</NuxtLink>
-    </nav>
-
+    <div v-if="!user">
+      <nav class="top-nav">
+        <NuxtLink to="/register">Register</NuxtLink>
+        <NuxtLink to="/login">Login</NuxtLink>
+      <!-- <NuxtLink to="/dashboard">Dashboard</NuxtLink> -->
+      </nav>
+    </div>
     <main>
       <NuxtPage />
     </main>

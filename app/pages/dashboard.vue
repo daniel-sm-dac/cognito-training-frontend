@@ -1,6 +1,5 @@
 <script setup lang="ts">
-
-
+import { ref } from 'vue'
 const { user, logout, getTokens, authFetch } = useAuth()
 const error = ref('')
 const users = ref<any[]>([])
@@ -47,20 +46,25 @@ async function handleLogout() {
 
 </script>
 
-
 <template>
   <div class="dashboard-page">
-    <div v-if="user">
-      <!-- <h1>Dashboard</h1> -->
-      <h1>Welcome, {{ user.email }}</h1>
-      <button @click="handleLogout">Sign out</button>
-    </div>
-  </div>
-  <div>
-    <p v-if="error">{{ error }}</p>
-    <ul v-else>
-      <li v-for="u in users" :key="u.userId">{{ u.email }} — {{ u.role }}</li>
-    </ul>
+    <header v-if="user" class="dashboard-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p class="welcome">Welcome back, {{ user.email }}</p>
+      </div>
+      <button class="btn-outline" @click="handleLogout">Sign out</button>
+    </header>
+
+    <section class="users-section">
+      <p v-if="error" class="error">{{ error }}</p>
+      <ul v-else class="user-list">
+        <li v-for="u in users" :key="u.userId" class="user-row">
+          <span class="email">{{ u.email }}</span>
+          <span class="role">{{ u.role }}</span>
+        </li>
+      </ul>
+    </section>
   </div>
 </template>
 
@@ -68,15 +72,73 @@ async function handleLogout() {
 .dashboard-page {
   max-width: 720px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 1.5rem;
 }
-button {
-  padding: 0.75rem 1.25rem;
-  background-color: #007bff;
-  border: none;
-  color: white;
-  font-weight: bold;
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dashboard-header h1 {
+  font-size: 1.5rem;
+  margin: 0 0 0.25rem;
+}
+
+.welcome {
+  color: #6b7280;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.btn-outline {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
   cursor: pointer;
-  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.btn-outline:hover {
+  background: #f9fafb;
+}
+
+.user-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.user-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.user-row:last-child {
+  border-bottom: none;
+}
+
+.email {
+  color: #111827;
+}
+
+.role {
+  color: #6b7280;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+}
+
+.error {
+  color: #dc2626;
 }
 </style>
