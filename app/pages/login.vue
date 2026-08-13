@@ -48,7 +48,6 @@ import { useAuth } from '../composables/useAuth'
       }
     }
 
-    console.log("result :", result)
     switch (result.errorName) {
       case 'UserNotFoundException':
         error.value = 'No account found with that email.'

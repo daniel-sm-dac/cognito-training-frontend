@@ -1,8 +1,5 @@
 import { confirmSignUp, fetchAuthSession, getCurrentUser, resendSignUpCode, signIn, signOut, signUp, type SignUpInput } from 'aws-amplify/auth'
 
-
-
-
 export interface RegisterInput {
   email: string
   password: string
@@ -70,6 +67,7 @@ export function useAuth() {
   // Pull the current ID/Access/refresh token set for API calls. 
   async function getTokens() {
     const session = await fetchAuthSession()
+    console.log("session: ", session);
     return {
       idToken : session.tokens?.idToken?.toString() ?? null,
       accessToken : session.tokens?.accessToken?.toString() ?? null
@@ -78,26 +76,23 @@ export function useAuth() {
 
   async function authFetch(url: string, options: RequestInit = {}) {
     const { idToken } = await getTokens()
+    if (!idToken) throw new Error('Not signed in - no token available for this request.')
+
+    const finalHeaders = { 
+      ...options.headers, 
+      Authorization: `Bearer ${idToken}` 
+    }
     
-    if (!idToken) {
-      throw new Error('Not signed in - no token available for this request.')
-    }
+    console.log(">>>> final headers:", finalHeaders)
 
-    const headerWithToken = {
-      ...options.headers,
-      Authorization: `Bearer ${idToken}`
-    }
-
-    return fetch(url, {
-      ...options,
-      headers: headerWithToken
-    })
+    return fetch(url, { ...options, headers: finalHeaders })
   }
 
   async function restoreSession(){
     try {
       const current = await getCurrentUser()
-      console.log(current)
+      // const session = await getTokens()
+      // console.log("session: ", session)
       user.value = {
         userId: current.userId,
         email: current.signInDetails?.loginId ?? ''

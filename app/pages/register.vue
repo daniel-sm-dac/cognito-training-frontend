@@ -81,17 +81,6 @@
     return true
   }
 
-  function validateVerificationForm(): boolean {
-    error.value = []
-    if (!form.code) {
-      const errorMessage = 'Verification Code is required.'
-      error.value.push(errorMessage)
-    }
-    console.log(error.value)
-    if (error.value.length > 0) return false;
-    return true
-  }
-
   async function submitRegistration() {
     if (!validateForm()) {
       return
@@ -143,55 +132,6 @@
       submitting.value = false
     }
   }
-
-  // async function submitConfirmCode() {
-    
-  //   if (!validateVerificationForm()) {
-  //     return
-  //   }
-
-  //   submittingCode.value = true
-  //   error.value = []
-  //   success.value = ''
-    
-  //   try {
-  //     const result = await verifyEmail(form.email, form.code)
-
-  //     if (result.success) {
-  //       // form.email = '',
-  //       form.code = ''
-  //       await navigateTo('/login')
-  //     } else {
-  //       const errorMessage = result.error ?? 'Verification failed. Please try again.'
-  //       error.value.push(errorMessage)
-  //     }
-  //   } catch {
-  //       const errorMessage = 'Verification failed. Please try again.'
-  //       error.value.push(errorMessage)
-  //   } finally {
-  //     submittingCode.value = false
-  //   }
-  // }
-
-  // async function handleResendVerification(){
-  //   console.log("resendVerification")
-  //   submittingCode.value = true
-  //   error.value = []
-  //   success.value = ''
-
-  //   try {
-  //     const result = await resendVerificationCode(form.email)
-  //     if (result.success) {
-  //       success.value = `Code resent to ${destination.value}`  
-  //     }
-  //   } catch {
-  //     const errorMessage = 'Resend Verification failed. Please try again.'
-  //     error.value.push(errorMessage)
-  //   } finally {
-  //     submittingCode.value = false
-  //   }
-  // }
-  // const config = useRuntimeConfig()
 </script>
 
 <template>
