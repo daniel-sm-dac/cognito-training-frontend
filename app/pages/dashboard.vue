@@ -7,12 +7,11 @@ const users = ref<any[]>([])
 
 onMounted(async () => {
   const tokens = await getTokens()
-  console.log('tokens result:', tokens)
   if (!tokens.idToken) {
     console.warn('No idToken — session may not be ready yet')
     return
   }
-  console.log('raw token:', tokens.idToken)
+  // console.log('raw token:', tokens.idToken)
 
   try {
     const res = await authFetch('https://8p7gwoln99.execute-api.ap-southeast-1.amazonaws.com/dev/users', {
@@ -31,7 +30,6 @@ onMounted(async () => {
     }
 
     if (!res.ok) throw new Error(`Request failed: ${res.status}`)
-    console.log("response: ", res)
     const data = await res.json()
     users.value = data.users
   } catch (err) {
