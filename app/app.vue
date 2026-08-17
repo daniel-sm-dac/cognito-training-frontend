@@ -7,14 +7,14 @@ const { user } = useAuth()
 <template>
   <div class="app-shell">
     <NuxtRouteAnnouncer />
-    <ClientOnly>
+    <!-- <ClientOnly>
       <div v-if="!user">
         <nav class="top-nav">
           <NuxtLink to="/register">Register</NuxtLink>
           <NuxtLink to="/login">Login</NuxtLink>
         </nav>
       </div>
-    </ClientOnly>
+    </ClientOnly> -->
     <main>
       <NuxtPage />
     </main>

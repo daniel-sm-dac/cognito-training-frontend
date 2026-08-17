@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { useAuth } from '../composables/useAuth'
+// import { useAuth } from '../composables/useAuth'
+import { useAuthSso } from '#imports'
 
-const { verifyEmail, resendVerificationCode } = useAuth()
+// const { verifyEmail, resendVerificationCode } = useAuth()
+const { verifyEmailSSO, resendVerificationCodeSSO } = useAuthSso()
 const route = useRoute()
 const router = useRouter()
 
@@ -18,7 +20,7 @@ async function handleVerify() {
   submitting.value = true
 
   try {
-    const result = await verifyEmail(email.value, code.value)
+    const result = await verifyEmailSSO(email.value, code.value)
 
     if (!result.success) {
       errorMessage.value = result.error ?? 'Verification failed.'
@@ -38,7 +40,7 @@ async function handleResend() {
   submitting.value = true
 
   try {
-    const result = await resendVerificationCode(email.value)
+    const result = await resendVerificationCodeSSO(email.value)
 
     statusMessage.value = result.success
       ? 'A new code has been sent to your email.'

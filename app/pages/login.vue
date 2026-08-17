@@ -1,6 +1,6 @@
 <script setup lang="ts">
-  import { P } from 'vue-router/dist/index-BN0B0y8a.js'
-import { useAuth } from '../composables/useAuth'
+// import { useAuth } from '../composables/useAuth'
+import { useAuthSso } from '../composables/useAuthSso'
 
   interface LoginForm {
     email: string
@@ -14,60 +14,78 @@ import { useAuth } from '../composables/useAuth'
     code: ''
   })
 
-  const router = useRouter()
+  // const router = useRouter()
+  const route = useRoute()
   const submitting = ref(false)
   const error = ref('')
   const success = ref('')
-  const { login } = useAuth()
+  // const { login } = useAuth()
+  const { loginSSO } = useAuthSso()
+
+  const returnTo = route.query.return_to as string
+  const clientAppId = route.query.client_app_id as string
   // const justVerified = computed(() => route.query.verified === '1')
-
-  async function handleSubmit() {
-    error.value = ''
-    submitting.value = true
-    
   
-    const result = await login(form.email, form.password)
-    submitting.value = false
-  
-    if (result.success) {
-      // Tokens are already stored by Amplify at this point - the dashboard
-      // page can read them back via authFetch() whenever it needs to call
-      // an API. We just redirect; nothing else to do here.
+  async function handleSubmitSSO() {
+    const result = await loginSSO(form.email, form.password, clientAppId)
 
-      router.push('/dashboard')
+    if (!result.success) {
+      error.value = result.error ?? 'Login failed'
       return
     }
 
-    if (result.nextStep){
-      switch (result.nextStep.signInStep) {
-        case 'CONFIRM_SIGN_UP':
-            return navigateTo(`/verify?email=${encodeURIComponent(form.email)}`)
-        default:
-          error.value = 'Additional Verification required'
-          break;
-      }
-    }
-
-    switch (result.errorName) {
-      case 'UserNotFoundException':
-        error.value = 'No account found with that email.'
-        break
-      case 'NotAuthorizedException':
-        error.value = 'Incorrect email or password.'
-        break
-      case 'UserLambdaValidationException':
-        error.value = 'Login failed.'
-        break
-      default:
-        error.value = result.error ?? 'Login failed.'
-    }
+    // send the browser back to the store app that redirected here
+    console.log(`${returnTo}?user_id=${result.user_id}`)
+    window.location.href = `${returnTo}?user_id=${result.user_id}`
   }
+
+  // async function handleSubmit() {
+  //   error.value = ''
+  //   submitting.value = true
+    
+  
+  //   const result = await login(form.email, form.password)
+  //   submitting.value = false
+  
+  //   if (result.success) {
+  //     // Tokens are already stored by Amplify at this point - the dashboard
+  //     // page can read them back via authFetch() whenever it needs to call
+  //     // an API. We just redirect; nothing else to do here.
+
+  //     router.push('/dashboard')
+  //     return
+  //   }
+
+  //   if (result.nextStep){
+  //     switch (result.nextStep.signInStep) {
+  //       case 'CONFIRM_SIGN_UP':
+  //           return navigateTo(`/verify?email=${encodeURIComponent(form.email)}`)
+  //       default:
+  //         error.value = 'Additional Verification required'
+  //         break;
+  //     }
+  //   }
+
+  //   switch (result.errorName) {
+  //     case 'UserNotFoundException':
+  //       error.value = 'No account found with that email.'
+  //       break
+  //     case 'NotAuthorizedException':
+  //       error.value = 'Incorrect email or password.'
+  //       break
+  //     case 'UserLambdaValidationException':
+  //       error.value = 'Login failed.'
+  //       break
+  //     default:
+  //       error.value = result.error ?? 'Login failed.'
+  //   }
+  // }
 </script>
 
 <template>
   <div class="auth-page">
     <h1>Login</h1>
-    <form @submit.prevent="handleSubmit">
+    <form @submit.prevent="handleSubmitSSO">
       <div class="form-group">
         <label for="email">Email</label>
         <input id="email" v-model="form.email" type="email" required />

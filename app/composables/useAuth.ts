@@ -26,7 +26,7 @@ const TOKENS_STORAGE_KEY = 'auth-tokens'
 
 export function useAuth() {
   // Shared reactive state across every component that calls useAuth()
-  const user = useState<{ userId: string; email: string } | null>('auth-user', () => null)
+  const user = useState<{ user_id: string; email: string } | null>('auth-user', () => null)
   const isAuthenticated = useState<boolean>('auth-is-authenticated', () => false)
   const tokens = useState<TokenSet | null>('auth-tokens', () => null)
   const router = useRouter()
@@ -102,7 +102,7 @@ export function useAuth() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: user.value?.userId,
+          user_id: user.value?.user_id,
           id_token,
           access_token,
           registration_channel: 'test-app-one',
@@ -124,8 +124,8 @@ export function useAuth() {
   }
 
   // called on test-app-two callback route when the user arrives via an SSO redirect (todo functionality)
-  async function handleSsoCallback(userId: string) {
-    const response = await fetch(`https://8p7gwoln99.execute-api.ap-southeast-1.amazonaws.com/dev/session/${userId}`)
+  async function handleSsoCallback(user_id: string) {
+    const response = await fetch(`https://8p7gwoln99.execute-api.ap-southeast-1.amazonaws.com/dev/session/${user_id}`)
 
     if (!response.ok) {
       router.push('/login')
@@ -135,7 +135,7 @@ export function useAuth() {
     const { id_token, access_token } = await response.json()
 
     tokens.value = { id_token, access_token }
-    user.value = { userId, email: '' } // email not returned by /session — fine as a placeholder, or extend the endpoint to include it
+    user.value = { user_id, email: '' } // email not returned by /session — fine as a placeholder, or extend the endpoint to include it
     isAuthenticated.value = true
     persistTokens(tokens.value)
 
@@ -177,7 +177,7 @@ export function useAuth() {
     try {
       const current = await getCurrentUser()
       user.value = {
-        userId: current.userId,
+        user_id: current.userId,
         email: current.signInDetails?.loginId ?? ''
       }
 
@@ -232,11 +232,14 @@ export function useAuth() {
 
   // Decodes a JWT's payload (no signature check) to see if its exp claim has passed
   function isTokenExpired(token: string): boolean {
+    
     try {
       const payload_split = token.split('.')[1]
       if (!payload_split) return true
       
       const payload = JSON.parse(atob(payload_split))
+      console.log("Expired Token ", payload.exp * 1000)
+      console.log("Date Now: ", Date.now())
       return Date.now() >= payload.exp * 1000
     } catch {
       return true // unreadable token — treat as expired, safer default
@@ -244,7 +247,7 @@ export function useAuth() {
   }
 
   // Decodes a JWT's payload to pull out the user's id and email, without a network call
-  function decodeUserFromIdToken(idToken: string): { userId: string; email: string } | null {
+  function decodeUserFromIdToken(idToken: string): { user_id: string; email: string } | null {
     try {
       const payload_part = idToken.split('.')[1]
       if (!payload_part) return null
@@ -252,7 +255,7 @@ export function useAuth() {
       const payload = JSON.parse(atob(payload_part))
       // console.log("idToken: >>>>>", idToken)
       // console.log("payload: >>>>>", payload)
-      return { userId: payload.sub, email: payload.email ?? '' }
+      return { user_id: payload.sub, email: payload.email ?? '' }
     } catch {
       return null
     }
@@ -261,14 +264,12 @@ export function useAuth() {
   // Rebuilds session state from localStorage on app boot — the main recovery path after a reload
   async function restorePersistedSession() {
     const stored = loadPersistedTokens()
-    // console.log("STORED: ", stored)
     if (!stored || isTokenExpired(stored.id_token)) {
       console.log("no stored token: ", stored)
       clearPersistedTokens()
       isAuthenticated.value = false
       return
     }
-    console.log("stored not expired: ", stored)
     tokens.value = stored
     user.value = decodeUserFromIdToken(stored.id_token)
     isAuthenticated.value = true

@@ -5,37 +5,37 @@ const error = ref('')
 const users = ref<any[]>([])
 // TEMP DEBUG - remove after testing
 
-onMounted(async () => {
-  const tokens = await getTokens()
-  if (!tokens.idToken) {
-    console.warn('No idToken — session may not be ready yet')
-    return
-  }
-  // console.log('raw token:', tokens.idToken)
+// onMounted(async () => {
+//   const tokens = await getTokens()
+//   if (!tokens.idToken) {
+//     console.warn('No idToken — session may not be ready yet')
+//     return
+//   }
+//   // console.log('raw token:', tokens.idToken)
 
-  try {
-    const res = await authFetch('https://8p7gwoln99.execute-api.ap-southeast-1.amazonaws.com/dev/users', {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    }) //for testing only (need to properly call this)
+//   try {
+//     const res = await authFetch('https://8p7gwoln99.execute-api.ap-southeast-1.amazonaws.com/dev/users', {
+//       method: 'GET',
+//       headers: { 'Content-Type': 'application/json' },
+//     }) //for testing only (need to properly call this)
     
-    if (res.status === 403) {
-      error.value = 'dont have permission'
-      return
-    }
+//     if (res.status === 403) {
+//       error.value = 'dont have permission'
+//       return
+//     }
 
-    if (res.status === 401) {
-      error.value = 'Please log in again.'
-      return
-    }
+//     if (res.status === 401) {
+//       error.value = 'Please log in again.'
+//       return
+//     }
 
-    if (!res.ok) throw new Error(`Request failed: ${res.status}`)
-    const data = await res.json()
-    users.value = data.users
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load users.'
-  }
-})
+//     if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+//     const data = await res.json()
+//     users.value = data.users
+//   } catch (err) {
+//     error.value = err instanceof Error ? err.message : 'Failed to load users.'
+//   }
+// })
 
 async function handleLogout() {
   await logout()
