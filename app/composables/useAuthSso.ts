@@ -7,9 +7,11 @@ export interface AuthResultSSO{
   error: string | null
 }
 export function useAuthSso() {
+  // needed to create LOGIN API to insert tokens in the database and get the refresh token to pass it to the client side
   async function loginSSO(email: string, password: string, clientAppId: string): Promise<AuthResultSSO> {
     try {
-      const response = await fetch('https://8p7gwoln99.execute-api.ap-southeast-1.amazonaws.com/dev/login', {
+      
+      const response = await fetch('https://8p7gwoln99.execute-api.ap-southeast-1.amazonaws.com/dev/login', { // TODO API URL move to Config
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: email, password, client_app_id: clientAppId }),
