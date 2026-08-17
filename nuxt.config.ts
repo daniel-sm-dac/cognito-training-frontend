@@ -7,6 +7,7 @@ export default defineNuxtConfig({
       cognitoUserPoolId: process.env.COGNITO_USER_POOL_ID || 'FALLBACK-NOT-LOADED',
       cognitoClientId: process.env.COGNITO_USER_POOL_CLIENT_ID || '',
       cognitoRegion: process.env.COGNITO_REGION || 'ap-southeast-1',
+      loginAppUrl: 'http://localhost:3000',
     },
   },
 })

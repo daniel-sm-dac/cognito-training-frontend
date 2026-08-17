@@ -27,16 +27,32 @@ import { useAuthSso } from '../composables/useAuthSso'
   // const justVerified = computed(() => route.query.verified === '1')
   
   async function handleSubmitSSO() {
+    error.value = ''
+    submitting.value = true
     const result = await loginSSO(form.email, form.password, clientAppId)
 
+    submitting.value = false
     if (!result.success) {
-      error.value = result.error ?? 'Login failed'
+      mapErrorMessage(result.error as string)
       return
     }
 
     // send the browser back to the store app that redirected here
     console.log(`${returnTo}?user_id=${result.user_id}`)
     window.location.href = `${returnTo}?user_id=${result.user_id}`
+  }
+
+  function mapErrorMessage(code: string) {
+    switch (code) {
+      case 'invalid_credentials': 
+        error.value = 'Incorrect email or password.'
+        break
+      case 'account_not_verified': 
+        return navigateTo(`/verify?email=${encodeURIComponent(form.email)}&${returnTo}&client_app_id=${clientAppId}`)
+      default: 
+        error.value = 'Something went wrong. Please try again.'
+        break
+    }
   }
 
   // async function handleSubmit() {

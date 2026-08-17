@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import { useAuth } from './composables/useAuth'
 const { user } = useAuth()
-
+const route = useRoute()
+const returnTo = route.query.return_to as string
+const clientAppId = route.query.client_app_id as string
 </script>
 
 <template>
   <div class="app-shell">
     <NuxtRouteAnnouncer />
-    <!-- <ClientOnly>
+    <ClientOnly>
       <div v-if="!user">
         <nav class="top-nav">
-          <NuxtLink to="/register">Register</NuxtLink>
-          <NuxtLink to="/login">Login</NuxtLink>
+          <NuxtLink :to="{ path: '/register', query: { return_to: returnTo, client_app_id: clientAppId } }">Register</NuxtLink>
+          <!-- <NuxtLink to="/login">Login</NuxtLink> -->
         </nav>
       </div>
-    </ClientOnly> -->
+    </ClientOnly>
     <main>
       <NuxtPage />
     </main>

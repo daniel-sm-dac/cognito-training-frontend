@@ -123,24 +123,24 @@ export function useAuth() {
     }
   }
 
-  // called on test-app-two callback route when the user arrives via an SSO redirect (todo functionality)
-  async function handleSsoCallback(user_id: string) {
-    const response = await fetch(`https://8p7gwoln99.execute-api.ap-southeast-1.amazonaws.com/dev/session/${user_id}`)
+  // // called on test-app-two callback route when the user arrives via an SSO redirect (todo functionality)
+  // async function handleSsoCallback(user_id: string) {
+  //   const response = await fetch(`https://8p7gwoln99.execute-api.ap-southeast-1.amazonaws.com/dev/session/${user_id}`)
 
-    if (!response.ok) {
-      router.push('/login')
-      return
-    }
+  //   if (!response.ok) {
+  //     router.push('/login')
+  //     return
+  //   }
 
-    const { id_token, access_token } = await response.json()
+  //   const { id_token, access_token } = await response.json()
 
-    tokens.value = { id_token, access_token }
-    user.value = { user_id, email: '' } // email not returned by /session — fine as a placeholder, or extend the endpoint to include it
-    isAuthenticated.value = true
-    persistTokens(tokens.value)
+  //   tokens.value = { id_token, access_token }
+  //   user.value = { user_id, email: '' } // email not returned by /session — fine as a placeholder, or extend the endpoint to include it
+  //   isAuthenticated.value = true
+  //   persistTokens(tokens.value)
 
-    router.push('/dashboard')
-  }
+  //   router.push('/dashboard')
+  // }
 
   // Returns the current token set for API calls — prefers Amplify's live session, falls back to our own stored session
   async function getTokens() {
@@ -285,7 +285,7 @@ export function useAuth() {
     authFetch,
     getTokens,
     restoreSession,
-    handleSsoCallback,
+    // handleSsoCallback,
     restorePersistedSession,
     isAuthenticated,
     user,

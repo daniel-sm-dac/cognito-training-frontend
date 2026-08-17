@@ -39,6 +39,8 @@
   const success = ref('')
   const deliveryMedium = ref<string | undefined>('')
   const destination = ref<string | undefined>('')
+  const returnTo = route.query.return_to as string
+  const clientAppId = route.query.client_app_id as string
 
   const { register } = useAuth()
   // const { verifyEmail } = useAuth()
@@ -117,7 +119,11 @@
           deliveryMedium.value = nextStep.codeDeliveryDetails?.deliveryMedium
           destination.value = nextStep.codeDeliveryDetails?.destination
         }
-        router.push({ path: '/verify', query: { email: form.email} })
+        router.push({ path: '/verify', query: { 
+          email: form.email,
+          return_to: returnTo,
+          client_app_id: clientAppId
+        }})
         // await navigateTo('/dashboard')
       } else {
         // error.value = result.error ?? 'Registration failed. Please try again.'

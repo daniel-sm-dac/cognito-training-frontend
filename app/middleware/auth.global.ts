@@ -9,14 +9,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
     await restoreSession()
   }
 
-  const protectedRoutesDashboard = ['/dashboard']
-  const protectedRoutesLogin= ['/login']
-  if (protectedRoutesDashboard.includes(to.path) && !isAuthenticated.value) {
-    return navigateTo('/login')
-  }
+  // const protectedRoutesDashboard = ['/dashboard']
+  // const protectedRoutesLogin= ['/login']
+  // if (protectedRoutesDashboard.includes(to.path) && !isAuthenticated.value) {
+  //   return navigateTo('/login')
+  // }
 
-  if (protectedRoutesLogin.includes(to.path) && isAuthenticated.value) {
-    return navigateTo('/dashboard')
-  }
+  // if (protectedRoutesLogin.includes(to.path) && isAuthenticated.value) {
+  //   return navigateTo('/dashboard')
+  // }
 
 })

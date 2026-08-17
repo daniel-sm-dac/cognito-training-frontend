@@ -6,12 +6,16 @@ import { useAuthSso } from '#imports'
 const { verifyEmailSSO, resendVerificationCodeSSO } = useAuthSso()
 const route = useRoute()
 const router = useRouter()
+const config = useRuntimeConfig()
 
 const email = ref((route.query.email as string) ?? '')
 const code = ref('')
 const errorMessage = ref('')
 const statusMessage = ref('')
 const submitting = ref(false)
+
+const returnTo = route.query.return_to as string
+const clientAppId = route.query.client_app_id as string
 // const isResending = ref(false)
 
 async function handleVerify() {
@@ -27,7 +31,12 @@ async function handleVerify() {
       return
     }
 
-    router.push({ path: '/login' })
+    // router.push({ path: `/login?return_to=${returnTo}&client_app_id=${clientAppId}` })
+    router.push({ path: '/login', query: { 
+      return_to: returnTo,
+      client_app_id: clientAppId
+    }})
+    // window.location.href = `${config.public.loginAppUrl}/login?return_to=${returnTo}&client_app_id=${clientAppId}`
   } catch (err) {
     errorMessage.value = err instanceof Error ? err.message : 'Verification failed.'
   } finally {
@@ -73,7 +82,7 @@ async function handleResend() {
       </div>
       
       <div class="form-group">
-        <label for="code">code</label>
+        <label for="code">Code</label>
         <input v-model="code" type="text" placeholder="Verification code" required />
       </div>
       
