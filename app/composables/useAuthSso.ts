@@ -43,16 +43,16 @@ export function useAuthSso() {
   }
 
   // Requests a new signup verification code be sent
-    async function resendVerificationCodeSSO(email: string): Promise<AuthResult> {
-      try {
-        await resendSignUpCode({ username: email })
-        return { success: true, error: null, errorName: null }
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Resend verification failed'
-        const name = err instanceof Error ? err.name : null
-        return { success: false, error: message, errorName: name }
-      }
+  async function resendVerificationCodeSSO(email: string): Promise<AuthResult> {
+    try {
+      await resendSignUpCode({ username: email })
+      return { success: true, error: null, errorName: null }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Resend verification failed'
+      const name = err instanceof Error ? err.name : null
+      return { success: false, error: message, errorName: name }
     }
+  }
 
   return {
     loginSSO,
